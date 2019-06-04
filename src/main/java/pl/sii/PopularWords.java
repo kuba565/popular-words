@@ -1,8 +1,9 @@
 package pl.sii;
 
-import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.Map;
+import pl.sii.service.OwnFileReader;
+
+import java.util.*;
 
 public class PopularWords {
 
@@ -12,7 +13,27 @@ public class PopularWords {
         result.entrySet().forEach(System.out::println);
     }
 
-    public Map<String, Long> findOneThousandMostPopularWords() {
-        throw new NotImplementedException("TODO implementation");
+    Map<String, Long> findOneThousandMostPopularWords() {
+        return findOneThousandMostPopularWords("src/main/resources/3esl.txt");
+    }
+
+    Map<String, Long> findOneThousandMostPopularWords(String path) {
+        var lines = new OwnFileReader().readWords(path);
+        Map<String, Long> wordsAndFrequency = new HashMap<>();
+
+        lines.forEach(word -> {
+            wordsAndFrequency.computeIfPresent(word, (k, v) -> v + 1);
+            wordsAndFrequency.putIfAbsent(word, 1L);
+        });
+
+        var list = new LinkedList<>(wordsAndFrequency.entrySet());
+
+        list.sort(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()));
+
+        Map<String, Long> map = new LinkedHashMap<>();
+
+        list.stream().limit(1000).forEach(e -> map.put(e.getKey(), e.getValue()));
+
+        return map;
     }
 }
